@@ -614,6 +614,17 @@ body{
     const text = input.value.trim();
     if (!text || isLoading) return;
 
+    // ── Lock if message too long ──
+    if (text.length > 600) {
+      chatLocked = true;
+      input.disabled    = true;
+      sendBtn.disabled  = true;
+      input.placeholder = '⛔ Chat locked – message too long. Refresh to unlock.';
+      document.getElementById('mia-footer-note').textContent = '⚠️ Locked · Refresh to unlock';
+      addMessage('bot', '⛔ **Chat locked** — your message was too long. Please keep messages under 600 characters. Refresh the page to unlock. 🔄');
+      return;
+    }
+
     addMessage('user', text);
     history.push({ role: 'user', content: text });
     input.value = '';
@@ -640,7 +651,6 @@ body{
       if (!res.ok) throw new Error(`HTTP ${res.status}`);
       const data = await res.json();
 
-      // ⛔ SPAM LOCK – disable chat permanently until refresh
       if (data.spam) {
         chatLocked = true;
         input.disabled = true;
@@ -692,12 +702,7 @@ body{
   }
 
   function scrollToBottom() { msgs.scrollTop = msgs.scrollHeight; }
-
-  function setLoading(s) {
-    isLoading = s;
-    input.disabled = s;
-    sendBtn.disabled = s;
-  }
+  function setLoading(s) { isLoading = s; input.disabled = s; sendBtn.disabled = s; }
 })();
 </script>
 </body>
